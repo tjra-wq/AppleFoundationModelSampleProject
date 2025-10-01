@@ -73,21 +73,48 @@ import Playgrounds
 //}
 
 //3.1 Building prompts with PromptBuilder
-#Playground{
-    let instruction = "Your job is to create an itinerary for the user."
-    let session = LanguageModelSession(instructions: instruction)
+//#Playground{
+//    let instruction = "Your job is to create an itinerary for the user."
+//    let session = LanguageModelSession(instructions: instruction)
+//    
+//    let kidFriendly = true
+//    
+//    //The Prompt Builder allows for conditional logic.
+//    let prompt = Prompt {
+//        "Generate a 3-day itinerary to the Grand Canyon."
+//        if kidFriendly {
+//            "The itinerary must be kid-friendly."
+//            "Here is an example of the desired format, but don't copy its content:"
+//            Itinerary.exampleTripToJapan
+//        }
+//    }
+//    
+//    let response = try await session.respond(to: prompt, generating: Itinerary.self)
+//}
+
+
+//5.2 Give the model access to the FindPointsOfInterestTool
+#Playground {
+    let landmark = ModelData.landmarks[0]
+    let pointOfInterestTool = FindPointsOfInterestTool(landmark: landmark)
     
-    let kidFriendly = true
-    
-    //The Prompt Builder allows for conditional logic.
-    let prompt = Prompt {
-        "Generate a 3-day itinerary to the Grand Canyon."
-        if kidFriendly {
-            "The itinerary must be kid-friendly."
-            "Here is an example of the desired format, but don't copy its content:"
-            Itinerary.exampleTripToJapan
-        }
+    let instructions = Instructions {
+        "Your job is to create an itinerary for the user."
+        "For each day, you must suggest one hotel and one restaurant."
+        "Always use the 'findPointsOfInterest' tools to find hotels and restaurants in \(landmark.name)"
     }
     
-    let response = try await session.respond(to: prompt, generating: Itinerary.self)
+    let session = LanguageModelSession(
+        tools: [pointOfInterestTool],
+        instructions: instructions)
+    
+    let prompt = Prompt {
+        "Generate a 3-day itinerary to \(landmark.name)."
+        "Give it a fun title and description."
+    }
+    
+    let response = try await session.respond(to: prompt,
+                        generating: Itinerary.self,
+                                             options: GenerationOptions(sampling: .greedy))
+    let inspectSession = session
 }

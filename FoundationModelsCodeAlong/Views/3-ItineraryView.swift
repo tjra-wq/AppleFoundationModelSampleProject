@@ -11,51 +11,50 @@ import MapKit
 
 struct ItineraryView: View {
     let landmark: Landmark
-    // MARK: - [CODE-ALONG] Chapter 4.2.1: Update to accept PartiallyGenerated type
-    let itinerary: Itinerary
+    let itinerary: Itinerary.PartiallyGenerated
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             VStack(alignment: .leading) {
-                // MARK: - [CODE-ALONG] Chapter 4.2.2: Update to unwrap all PartiallyGenerated types
-                Text(itinerary.title)
-                    .contentTransition(.opacity)
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                
-                // MARK: - [CODE-ALONG] Chapter 4.2.2: Update to unwrap all PartiallyGenerated types
-                Text(itinerary.description)
-                    .contentTransition(.opacity)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                if let title = itinerary.title {
+                    Text(title)
+                        .contentTransition(.opacity)
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                }
+                if let description = itinerary.description {
+                    Text(description)
+                        .contentTransition(.opacity)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
             }
             HStack(alignment: .top) {
                 Image(systemName: "sparkles")
-                // MARK: - [CODE-ALONG] Chapter 4.2.2: Update to unwrap all PartiallyGenerated types
-                Text(itinerary.rationale)
-                    .contentTransition(.opacity)
-                .rationaleStyle()
+                if let rationale = itinerary.rationale {
+                    Text(rationale)
+                        .contentTransition(.opacity)
+                    .rationaleStyle()
+                }
             }
             
-            // MARK: - [CODE-ALONG] Chapter 4.2.2: Update to unwrap all PartiallyGenerated types
-            ForEach(itinerary.days, id: \.title) { plan in
-                DayView(
-                    landmark: landmark,
-                    plan: plan
-                )
+            if let days = itinerary.days {
+                ForEach(days, id: \.title) { plan in
+                    DayView(
+                        landmark: landmark,
+                        plan: plan
+                    )
+                }
             }
-
         }
         .animation(.easeOut, value: itinerary)
         .itineraryStyle()
     }
 }
 
-// MARK: - [CODE-ALONG] Chapter 4.2.3: Update to unwrap all PartiallyGenerated types
 private struct DayView: View {
     let landmark: Landmark
-    // MARK: - [CODE-ALONG] Chapter 4.2.1: Update to accept PartiallyGenerated type
-    let plan: DayPlan
+    let plan: DayPlan.PartiallyGenerated
 
     @State private var mapItem: MKMapItem?
 
@@ -68,23 +67,27 @@ private struct DayView: View {
                 )
                 
                 .task(id: plan.destination) {
-                    guard !plan.destination.isEmpty else { return }
+                    guard let destination = plan.destination, !destination.isEmpty else { return }
                     
-                    if let fetchedItem = await LocationLookup().mapItem(atLocation: plan.destination) {
+                    if let fetchedItem = await LocationLookup().mapItem(atLocation: destination) {
                         self.mapItem = fetchedItem
                     }
                 }
                 
                 VStack(alignment: .leading) {
                     
-                    Text(plan.title)
-                            .contentTransition(.opacity)
-                            .font(.headline)
-
-                        Text(plan.subtitle)
+                    if let title = plan.title {
+                        Text(title)
+                                .contentTransition(.opacity)
+                                .font(.headline)
+                    }
+                    
+                    if let subtitle = plan.subtitle {
+                        Text(subtitle)
                             .contentTransition(.opacity)
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
+                    }
                 }
                 .padding(12)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -95,7 +98,7 @@ private struct DayView: View {
             .frame(height: 200)
             .padding([.horizontal, .top], 4)
             
-            ActivityList(activities: plan.activities)
+            ActivityList(activities: plan.activities ?? [])
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal)
         }
@@ -108,22 +111,26 @@ private struct DayView: View {
 }
 
 private struct ActivityList: View {
-    // MARK: - [CODE-ALONG] Chapter 4.2.1: Update to accept PartiallyGenerated type
-    let activities: [Activity]
+    let activities: [Activity].PartiallyGenerated
     
     var body: some View {
         ForEach(activities, id: \.title) { activity in
             HStack(alignment: .top, spacing: 12) {
-                    ActivityIcon(symbolName: activity.type.symbolName)
-                VStack(alignment: .leading) {
-                    Text(activity.title)
+                if let title = activity.title {
+                    ActivityIcon(symbolName: activity.type?.symbolName)
+                    VStack(alignment: .leading) {
+                    Text(title)
                         .contentTransition(.opacity)
                         .font(.headline)
-                    Text(activity.description)
-                        .contentTransition(.opacity)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                        if let description = activity.description {
+                            Text(description)
+                                .contentTransition(.opacity)
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
                 }
+
             }
         }
     }

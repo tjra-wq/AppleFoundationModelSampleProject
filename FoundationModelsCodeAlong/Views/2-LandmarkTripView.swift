@@ -48,10 +48,9 @@ struct LandmarkTripView: View {
 //            .hidden()
         }
         .task {
-            // MARK: - [CODE-ALONG] Chapter 1.6.2: Create the generator when the view appears
             let generator = ItineraryGenerator(landmark: landmark)
             self.itineraryGenerator = generator
-            // MARK: - [CODE-ALONG] Chapter 6.1.2: Pre-warm the model when the view appears
+            generator.prewarmModel()
             
         }
         .headerStyle(landmark: landmark)

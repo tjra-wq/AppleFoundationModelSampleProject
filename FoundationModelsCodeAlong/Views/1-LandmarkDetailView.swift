@@ -14,7 +14,6 @@ struct LandmarkDetailView: View {
     private let model = SystemLanguageModel.default
 
     var body: some View {
-        // MARK: - [CODE-ALONG] Chapter 1.4.3: Replace availability with model.availability
         switch model.availability {
         case .available:
             LandmarkTripView(landmark: landmark)
